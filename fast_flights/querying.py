@@ -18,6 +18,9 @@ from .pb.flights_pb2 import (
 )
 from .types import Currency, Language, SeatType, TripType
 
+from db_functions import pull_table
+from .exceptions import FlightQueryError, AirportNotFound
+
 
 @dataclass
 class Query:
@@ -124,6 +127,11 @@ class FlightQuery:
     less_emissions_only: bool = False
 
     def pb(self) -> FlightData:
+        airports = pull_table("airports")
+        if self.from_airport not in airports:
+            raise AirportNotFound()
+        if self.to_airport not in airports:
+            raise AirportNotFound()
         if isinstance(self.date, str):
             date = self.date
         else:
